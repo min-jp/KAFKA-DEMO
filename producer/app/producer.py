@@ -10,13 +10,12 @@ class ProdFactory :
         'client.id': 'python-producer',
     }
 
-
     # 메시지 전송 콜백 함수
     def delivery_report(err, msg):
         if err is not None:
-            print(f'❌ 메시지 전송 실패: {err}')
+            print(f'❌ produce err: {err}')
         else:
-            print(f'✅ 메시지 전송 성공: {msg.topic()} [{msg.partition()}] {msg.value().decode("utf-8")}')
+            print(f'✅ produce succ: {msg.topic()} [{msg.partition()}] {msg.value().decode("utf-8")}')
 
     @classmethod
     def publish(cls, topic, message) :
