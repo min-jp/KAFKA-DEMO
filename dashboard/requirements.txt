@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+websocket-client
+websockets
+asyncio
+python-dotenv
