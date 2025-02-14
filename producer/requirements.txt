@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+confluent_kafka
+websocket-client
+websockets
+asyncio
+python-dotenv

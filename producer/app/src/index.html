@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let socket;
+
+        function startWebSocket() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                alert("이미 실행 중입니다!");
+                return;
+            }
+
+            socket = new WebSocket("ws://localhost:8000/wss/data");
+
+            socket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    price = document.getElementById("result-price")
+                    // console.log(price.innerText +" | "+data.price)
+                    if (Number.parseFloat(price.innerText.replaceAll(",","")) > Number.parseFloat(data.price)) {
+                        price.style.color="blue"
+                    } else if (Number.parseFloat(price.innerText.replaceAll(",","")) == Number.parseFloat(data.price)) {
+                        price.style.color="black"
+                    } else {
+                        price.style.color="red"
+                    }
+                    price.innerText = data.price.toLocaleString();
+
+                    document.getElementById("result-timestamp").innerText = "UTC - " + data.timestamp.toString().replace(/(\d{2})(\d{2})(\d{2})/, "$1 : $2 : $3");
+                        
+                        
+                } catch (error) {
+                    console.error("데이터 파싱 오류:", error);
+                }
+            };
+
+            socket.onopen = function() {
+                console.log("웹소켓 연결됨");
+            };
+
+            socket.onclose = function() {
+                console.log("웹소켓 연결 종료");
+            };
+
+            socket.onerror = function(error) {
+                console.error("웹소켓 오류 발생:", error);
+            };
+        }
+    </script>
+
+    <div class="flex flex-col justify-center items-center w-screen h-screen">
+        <div class="">
+            <h1 class="text-6xl text-bold" id="result-price">18222940</h1>
+        </div>
+        <div class="mt-3">
+            <h3 class="text-2xl text-bold" id="result-timestamp">09:00:11</h3>
+        </div>
+        <div class="mt-5">
+            <button onclick="startWebSocket()"> 정보 가져오기 </button>
+        </div>
+    </div>
+</body>
+</html>
