@@ -49,6 +49,9 @@ class UpbitWss:
 
     @classmethod
     def getWebSocket(cls):
+        if cls.ws_instance :
+            return cls.ws_instance
+        
         return websocket.WebSocketApp(
             cls.uri,
             on_open=cls.on_open,
@@ -60,8 +63,8 @@ class UpbitWss:
     @classmethod
     def startWebSocket(cls):
         def run():
-            ws = cls.getWebSocket()
-            ws.run_forever()
+            cls.ws_instance = cls.getWebSocket()
+            cls.ws_instance.run_forever()
 
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
@@ -71,5 +74,7 @@ class UpbitWss:
         if cls.ws_instance:
             cls.ws_instance.close()  # 웹소켓 종료
             print("WebSocket closed.")
+            cls.ws_instance = None
+
         else:
             print("No WebSocket connection to close.")
