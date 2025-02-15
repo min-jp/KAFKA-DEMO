@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.example.consumer.websocket.StockTradeWebSocketHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 
@@ -14,11 +14,9 @@ import java.math.BigDecimal;
 @Service
 public class StockTradeConsumer {
     private final ObjectMapper objectMapper = new ObjectMapper(); // Jackson ObjectMapper 생성
-    private final StockTradeWebSocketHandler webSocketHandler;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private static final String WEBSOCKET_SERVER_URL = "http://localhost:8080/api/trade/send"; // WebSocket 서버 REST API
 
-    public StockTradeConsumer(StockTradeWebSocketHandler webSocketHandler){
-        this.webSocketHandler = webSocketHandler;
-    }
     @KafkaListener(topics = "stock_trade", groupId = "stock-trade-group")
     public void consumeStockTrade(ConsumerRecord<String, String> record) {
         try {
@@ -34,7 +32,7 @@ public class StockTradeConsumer {
                     price.toPlainString(), timestamp);
 
             // 웹소켓을 통해 데이터 전송
-            webSocketHandler.sendMessageToAllClients(jsonMessage);
+            restTemplate.postForObject(WEBSOCKET_SERVER_URL, jsonMessage, String.class);
 
             // 로그 출력
             log.info("체결가={}, 체결시간={}", price.toPlainString(), timestamp);
