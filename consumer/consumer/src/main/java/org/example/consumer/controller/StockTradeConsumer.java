@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +18,10 @@ public class StockTradeConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String WEBSOCKET_SERVER_URL = "http://localhost:8080/api/trade/send"; // WebSocket 서버 REST API
 
-    @KafkaListener(topics = "stock_trade", groupId = "stock-trade-group")
+    @Value("${KAFKA_CONSUMER_GROUP:default-group}")
+    private String kafkaConsumerGroup;
+
+    @KafkaListener(topics = "stock_trade", groupId = "#{T(java.lang.System).getenv('KAFKA_CONSUMER_GROUP') ?: 'default-group'}")
     public void consumeStockTrade(ConsumerRecord<String, String> record) {
         try {
             // JSON 문자열을 JsonNode 객체로 변환
