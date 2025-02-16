@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 주식 체결 데이터</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        h1 { color: #333; }
+        .data-box { font-size: 24px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>실시간 주식 체결 데이터</h1>
+    <div class="data-box">
+        <p><strong>체결가:</strong> <span id="price">-</span></p>
+        <p><strong>체결 시간:</strong> <span id="timestamp">-</span></p>
+    </div>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8080/ws/stock-trade");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            document.getElementById("price").innerText = data.price;
+            document.getElementById("timestamp").innerText = data.timestamp;
+        };
+
+        socket.onopen = function() {
+            console.log("WebSocket 연결됨");
+        };
+
+        socket.onerror = function(error) {
+            console.log("WebSocket 오류 발생:", error);
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket 연결 종료됨");
+        };
+    </script>
+</body>
+</html>
