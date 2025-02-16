@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: dashboard.dockerfile
+    container_name: dashboard
+    ports:
+      - "80:80"
+    env_file:
+      - .env
