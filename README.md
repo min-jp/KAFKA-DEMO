@@ -37,7 +37,7 @@ Kafka 컨슈머가 `stock-trade-group` 컨슈머 그룹을 통해 데이터를 �
 |**WebSocket 서버 (3개, 각 Consumer Group과 함께 실행)**|각 컨슈머 그룹에서 실행되며, 컨슈머들이 데이터를 WebSocket 서버의 REST API로 보내고, 서버는 연결된 클라이언트 및 대시보드에 실시간 전송|
 |**Dashboard 서버 (1개)**|WebSocket 서버와 연결되어 실시간 체결 정보를 모니터링할 수 있는 대시보드를 제공|
 
-📌 **총 10개의 서버가 GCP VM에서 실행 중**
+📌 **GCP VM에서 실행 중인 서버**
 
 - **Kafka Producer 서버 (1개)** → 실시간 비트코인 체결 정보 수집
 - **Kafka Broker 서버 (3개, 1개의 VM에서 실행)** → Kafka 토픽 데이터 관리 (도커 컴포즈로 실행)
