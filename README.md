@@ -7,6 +7,43 @@
 이 프로젝트는 **Kafka를 활용하여 비트코인 체결 정보를 실시간으로 수집하고, WebSocket을 통해 클라이언트에 전달하는 스트리밍 데이터 처리 시스템**입니다.  
 **GCP VM에서 Kafka Broker, WebSocket 서버, 컨슈머 그룹을 실행하여 대규모 트래픽에도 확장 가능한 구조를 구현**하였습니다.
 
+### 👨‍💻팀 소개
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+         <a href="https://github.com/danidana2">
+          <img src="https://avatars.githubusercontent.com/u/150885774?v=4" width="150px;" alt=""/>
+          <br /><sub><b> 최다영 </b></sub>
+        </a>
+        <br />
+      </td>
+      <td align="center">
+          <a href="https://github.com/dyoun12">
+          <img src="https://avatars.githubusercontent.com/u/107902336?v=4" width="150px;" alt=""/>
+          <br /><sub><b> 김대연 </b></sub>
+        </a>
+        <br />
+      </td>
+      <td align="center">
+        <a href="https://github.com/min-jp">
+          <img src="https://avatars.githubusercontent.com/u/129049084?v=4" width="150px;" alt=""/>
+          <br /><sub><b> 민정인 </b></sub>
+        </a>
+        <br />
+      </td>
+      <td align="center">
+        <a href="https://github.com/EOTAEGYU">
+          <img src="https://avatars.githubusercontent.com/u/123963462?v=4" width="150px;" alt=""/>
+          <br /><sub><b> 어태규 </b></sub>
+        </a>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+---
 
 ## **2️⃣ 학습 목표 🎯**
 
@@ -19,12 +56,12 @@
 - **GCP VM에서 Kafka 기반 마이크로서비스를 배포하는 방법**
 - **WebSocket을 활용한 실시간 대시보드 구축**
 
+---
 
 ## **3️⃣ 아키텍처 🏗️**
 
 프로젝트는 **Kafka와 WebSocket을 활용하여 실시간 스트리밍 데이터를 처리하는 구조**로 설계되었습니다.  
 Kafka 컨슈머가 `stock-trade-group` 컨슈머 그룹을 통해 데이터를 처리하며, WebSocket 서버를 통해 클라이언트 및 대시보드 서버로 전달됩니다.
-
 <img src="imgs/kafka-architecture.png" width="100%"/>
 
 ### **🔹 주요 아키텍처 구성**
@@ -122,6 +159,8 @@ Kafka 컨슈머가 `stock-trade-group` 컨슈머 그룹을 통해 데이터를 �
 - Kafka 데이터를 WebSocket을 통해 실시간으로 수신
 - 차트 및 그래프를 통해 데이터 시각화
 - **Kafka 시스템의 성능 및 상태를 모니터링하는 기능 추가 가능**
+
+---
 
 ## **5️⃣ 발표 자료 🖥️**
 [ 👉 Kafka에 대한 이해](/Team2_Kafka_Presentation.pdf)
