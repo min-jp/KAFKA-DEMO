@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>KAFKA-DEMO-Dashboard</title>
+</head>
+<body>
+    <style>
+
+        .result-gradiant::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, #ffffff 0, rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%, #ffffff 100%);;
+        }
+
+        /* Chrome, Edge, Safari (웹킷 브라우저) */
+        .scroller-none::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Firefox */
+        .scroller-none {
+            scrollbar-width: none; /* 스크롤바 숨기기 */
+        }
+
+    </style>
+    <script>
+        // 서버 이름 포멧에 맞게 변경
+        document.addEventListener('DOMContentLoaded', function () {
+            const serverNames = document.getElementsByClassName("server-name");
+
+            for (const sn of serverNames) {
+                if (sn && sn.innerText) {
+                    sn.innerText = sn.innerText
+                        .replace("ws://", "")
+                        .replace("/ws/stock-trade", "");
+                }
+            }
+        });
+
+        const uris = {
+            'prod' : "{{WSS_URI_PRODUCER}}",
+            'cons1' : "{{WSS_URI_CONSUMER_1}}",
+            'cons2' : "{{WSS_URI_CONSUMER_2}}",
+            'cons3' : "{{WSS_URI_CONSUMER_3}}",
+        }
+        const socket = {};
+
+        function openConn() {
+            document.getElementById("disconnectBtn").classList.remove("hidden");
+            document.getElementById("connectBtn").classList.add("hidden");
+
+            for (const key in uris) {
+                startWebSocket(uris[key], key);
+            }
+        }
+
+        function closeConn() {
+            document.getElementById("connectBtn").classList.remove("hidden");
+            document.getElementById("disconnectBtn").classList.add("hidden");
+
+            for (const key in uris) {
+                socket[key].close()
+            }
+        }
+        function startWebSocket(uri, serviceName) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                alert("이미 실행 중입니다!");
+                return;
+            }
+            socket[serviceName] = new WebSocket(uri);
+
+            socket[serviceName].onmessage = function(event) {
+                
+                const container = document.getElementById("result-datas-"+serviceName);
+                // 새로운 요소 생성
+                const newItem = document.createElement("div");
+                newItem.textContent = event.data;
+                
+                
+                // 앞에서 추가
+                container.append(newItem);
+                container.scrollTo({
+                    top: -container.scrollHeight,
+                    behavior:"smooth"
+                });
+
+
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log(serviceName + " | " + event.data)
+                    priceDom = document.getElementById("result-price-" + serviceName)
+                    if (Number.parseFloat(priceDom.innerText.replaceAll(",","")) > Number.parseFloat(data.price)) {
+                        priceDom.style.color="blue"
+                    } else if (Number.parseFloat(priceDom.innerText.replaceAll(",","")) == Number.parseFloat(data.price)) {
+                        priceDom.style.color="black"
+                    } else {
+                        priceDom.style.color="red"
+                    }
+                    priceDom.innerText = data.price.toLocaleString();
+                    document.getElementById("result-timestamp-" + serviceName).innerText = "UTC - " + data.timestamp.toString().replace(/(\d{2})(\d{2})(\d{2})/, "$1 : $2 : $3");
+                } catch (error) {
+                    console.error(serviceName +" | WS message parse error:", error);
+                }
+            };
+            socket[serviceName].onopen = function() {
+                console.log(serviceName + " | WS connected");
+            };
+            socket[serviceName].onclose = function() {
+                console.log(serviceName + " | WS close");
+            };
+            socket[serviceName].onerror = function(error) {
+                console.error(serviceName + " | WS error:", error);
+            };
+        }
+    </script>
+    <div class="flex flex-row justify-center items-center w-screen h-screen divide-x-2">
+        <div class="flex flex-col justify-center items-center w-[50%] h-[100%]">
+            <div class="">
+                <p class="server-name">Producer - {{WSS_URI_PRODUCER}}</p>
+            </div>
+            <div class="mt-5">
+                <h1 class="text-6xl text-bold" id="result-price-prod">100,000,000</h1>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-2xl text-bold" id="result-timestamp-prod">UTC - 00 : 00 : 00</h3>
+            </div>
+
+            <div class="result-gradiant relative mt-10">
+                <div id="result-datas-prod" class="flex flex-col-reverse  overflow-y-scroll h-[200px] scroller-none">
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151448"}</div>
+                    <div class="item show">{"price": 145507000.0, "timestamp": "151448"}</div>
+                    <div class="item show">{"price": 145507000.0, "timestamp": "151448"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151447"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151447"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151447"}</div>
+                    <div class="item show">{"price": 145506000.0, "timestamp": "151447"}</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col justify-around items-center w-[50%] h-[100%] divide-y-2">
+
+                
+            <div class="flex flex-col justify-center items-center h-[100%]">
+                <div class="">
+                    <p class="text-sm server-name" id="">Consumer1 - {{WSS_URI_CONSUMER_1}}</p>
+                </div>
+                <div class="mt-5">
+                    <h1 class="text-5xl text-bold" id="result-price-cons1">100,000,000</h1>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-lg text-bold" id="result-timestamp-cons1">UTC - 00 : 00 : 00</h3>
+                </div>
+                <div class="result-gradiant relative mt-6">
+                    <div id="result-datas-cons1" class="flex flex-col-reverse  overflow-y-scroll h-[80px] scroller-none">
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151448"}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-center items-center h-[100%]">
+                <div class="">
+                    <p class="text-sm server-name" id="">Consumer2 - {{WSS_URI_CONSUMER_2}}</p>
+                </div>
+                <div class="mt-5">
+                    <h1 class="text-5xl text-bold" id="result-price-cons2">100,000,000</h1>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-lg text-bold" id="result-timestamp-cons2">UTC - 00 : 00 : 00</h3>
+                </div>
+                <div class="result-gradiant relative mt-6">
+                    <div id="result-datas-cons2" class="flex flex-col-reverse  overflow-y-scroll h-[80px] scroller-none">
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151448"}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-center items-center h-[100%]">
+                <div class="">
+                    <p class="text-sm server-name" id="">Consumer3 - {{WSS_URI_CONSUMER_3}}</p>
+                </div>
+                <div class="mt-5">
+                    <h1 class="text-5xl text-bold" id="result-price-cons3">100,000,000</h1>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-lg text-bold" id="result-timestamp-cons3">UTC - 00 : 00 : 00</h3>
+                </div>
+                <div class="result-gradiant relative mt-6">
+                    <div id="result-datas-cons3" class="flex flex-col-reverse  overflow-y-scroll h-[80px] scroller-none">
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151449"}</div>
+                        <div class="item show">{"price": 145506000.0, "timestamp": "151448"}</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+        <!-- 연결 버튼 -->
+        <button onclick="openConn()" id="connectBtn" class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 4l12 8-12 8V4z" />
+            </svg>
+        </button>
+
+        <!-- 해제 버튼 -->
+        <button onclick="closeConn()" id="disconnectBtn" class="w-16 h-16 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8  h-8 ">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+   
+</body>
+</html>

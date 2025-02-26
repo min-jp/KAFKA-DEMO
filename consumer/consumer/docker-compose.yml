@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  websocket-server:
+    image: eotaegyu/kafka-websocket:latest
+    container_name: websocket-server
+    ports:
+      - "8080:8080"
+    networks:
+      - kafka_network
+
+  consumer-1:
+    image: eotaegyu/kafka-consumer:latest
+    container_name: consumer-1
+    env_file:
+      - .env  # .env 파일에서 환경 변수 로드
+    environment:
+      - SERVER_PORT=8081
+      - KAFKA_CONSUMER_GROUP=${SPRING_KAFKA_CONSUMER_GROUP_ID}  # .env 파일에서 가져오기
+    ports:
+      - "8081:8081"
+    networks:
+      - kafka_network
+
+  consumer-2:
+    image: eotaegyu/kafka-consumer:latest
+    container_name: consumer-2
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8082
+      - KAFKA_CONSUMER_GROUP=${SPRING_KAFKA_CONSUMER_GROUP_ID}
+    ports:
+      - "8082:8082"
+    networks:
+      - kafka_network
+
+  consumer-3:
+    image: eotaegyu/kafka-consumer:latest
+    container_name: consumer-3
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8083
+      - KAFKA_CONSUMER_GROUP=${SPRING_KAFKA_CONSUMER_GROUP_ID}
+    ports:
+      - "8083:8083"
+    networks:
+      - kafka_network
+
+networks:
+  kafka_network:
+    driver: bridge
